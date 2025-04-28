@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Options Analysis Tool</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <h2>Options Pricing Tool</h2>
+
+  <label>Underlying Price: <span id="underlyingDisplay">100</span></label>
+  <input type="range" id="underlyingSlider" min="50" max="150" value="100" step="1">
+  <br><br>
+
+  <label>Strike Price:</label>
+  <input type="number" id="strikePrice" value="100">
+  <br><br>
+
+  <label>Days to Expiration:</label>
+  <input type="number" id="daysToExpiration" value="30">
+  <br><br>
+
+  <label>Implied Volatility (e.g., 0.25):</label>
+  <input type="number" step="0.01" id="impliedVol" value="0.25">
+  <br><br>
+
+  <label>Risk-Free Rate (e.g., 0.05):</label>
+  <input type="number" step="0.001" id="riskFreeRate" value="0.05">
+  <br><br>
+
+  <button onclick="updateGraph()">Update Graph</button>
+  <div id="graph"></div>
+
+  <script>
+    function updateGraph() {
+      const S = parseFloat(document.getElementById('underlyingSlider').value);
+      const K = parseFloat(document.getElementById('strikePrice').value);
+      const T = parseFloat(document.getElementById('daysToExpiration').value) / 365;
+      const r = parseFloat(document.getElementById('riskFreeRate').value);
+      const sigma = parseFloat(document.getElementById('impliedVol').value);
+
+      const x = [];
+      const y = [];
+
+      for (let price = 50; price <= 150; price += 1) {
+        const payoff = Math.max(price - K, 0);  // Call option
+        const profit = payoff - (S - K);  // Naive PnL, just for shape
+        x.push(price);
+        y.push(profit);
+      }
+
+      const data = [{
+        x: x,
+        y: y,
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Profit/Loss'
+      }];
+
+      Plotly.newPlot('graph', data, {
+        title: 'Options PnL vs. Underlying Price',
+        xaxis: { title: 'Underlying Price' },
+        yaxis: { title: 'Profit / Loss' }
+      });
+
+      document.getElementById('underlyingDisplay').innerText = S;
+    }
+
+    document.getElementById('underlyingSlider').addEventListener('input', updateGraph);
+    window.onload = updateGraph;
+  </script>
+</body>
+</html>
